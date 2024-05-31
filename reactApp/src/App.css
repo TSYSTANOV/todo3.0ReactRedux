@@ -5,7 +5,8 @@
 }
 #root {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 .App {
   width: 800px;
@@ -32,4 +33,45 @@
 .post-exit-active {
   transform: translateX(-300px);
   transition: all 500ms ease-in;
+}
+.page__wrapper {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+.page {
+  cursor: pointer;
+  padding: 10px;
+  border: 1px solid teal;
+}
+.page__current {
+  border: 2px solid orange;
+  font-weight: 900;
+  padding: 10px;
+  cursor: none;
+}
+.navbar {
+  display: flex;
+  height: 50px;
+  width: 100vw;
+  align-items: center;
+  padding: 10px auto;
+  background-color: cadetblue;
+  justify-content: center;
+}
+.navbar__links {
+  display: flex;
+  gap: 20px;
+}
+.navbar__link {
+  text-decoration: none;
+  color: aliceblue;
+  font-size: 26px;
+  font-weight: 700;
+}
+.navbar__link--active {
+  text-decoration: solid;
+  color: bisque;
 }

@@ -1,25 +1,18 @@
-import { useRef } from "react";
+import { Loader } from "../UI/Loader/Loader";
 import { PostItem } from "./PostItem";
-import { TransitionGroup, CSSTransition } from "react-transition-group";
 
-function PostList({ posts, title, removePost }) {
-  const nodeRef = useRef(null);
-  if (!posts.length) {
+function PostList({ posts, title, removePost, loading }) {
+  if (!posts.length && !loading) {
     return <h2 style={{ textAlign: "center" }}>Posts are not found</h2>;
+  }
+  if (loading) {
+    return <Loader />;
   }
   return (
     <div>
       <h1 style={{ textAlign: "center" }}>{title}</h1>
-
-      {posts.map((item, i) => {
-        return (
-          <PostItem
-            key={item.id}
-            number={i + 1}
-            {...item}
-            removePost={removePost}
-          />
-        );
+      {posts.map((item) => {
+        return <PostItem key={item.id} {...item} removePost={removePost} />;
       })}
     </div>
   );

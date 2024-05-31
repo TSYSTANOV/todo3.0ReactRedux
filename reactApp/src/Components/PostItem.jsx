@@ -1,17 +1,19 @@
 import React, { useRef } from "react";
 import { MyButton } from "../UI/Button/MyButton";
-function PostItem({ id, title, body, number, removePost }) {
+import { NavLink } from "react-router-dom";
+function PostItem({ id, title, body, removePost }) {
   return (
     <div className="post">
       <div className="post__content">
         <strong>
-          {number}. {title}
+          {id}. {title}
         </strong>
         <div>
           {title} - {body}
         </div>
       </div>
       <div className="post__btns">
+        <NavLink to="parapet">to</NavLink>
         <MyButton
           onClick={() => {
             removePost(id);
