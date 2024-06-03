@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "../App.css";
 import { PostList } from "../Components/PostList";
 import { PostForm } from "../Components/PostForm";
@@ -10,14 +10,18 @@ import PostService from "../api/PostService";
 import { useFetching } from "../hooks/useFetching";
 import { getPagesCount } from "../utils/getPagesCount";
 import { Pagination } from "../UI/Pagination/Pagination";
+import { MySelect } from "../UI/Select/MySelect";
 function Posts() {
   const [posts, setPosts] = useState([]);
   const [visible, setVisible] = useState(false);
   const [filter, setFilter] = useState({ sort: "", search: "" });
   const [getFetchPosts, isLoading, postError] = useFetching(fetchPosts);
+  const [loadMore, setLoadMore] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const [limit, setLimit] = useState(15);
   const [page, setPage] = useState(1);
+  const observerElem = useRef();
+
   const pagesArray = useMemo(() => {
     function getPagesArray() {
       let pagesArray = [];
@@ -35,10 +39,17 @@ function Posts() {
   };
   useEffect(() => {
     getFetchPosts();
-  }, [page]);
+  }, [page, limit]);
   async function fetchPosts() {
     const posts = await PostService.getAllPosts(limit, page);
-    setPosts(posts.data);
+    if (loadMore) {
+      setPosts((prev) => {
+        return [...prev, ...posts.data];
+      });
+      setLoadMore(false);
+    } else {
+      setPosts(posts.data);
+    }
     const totalCount = posts.headers["x-total-count"];
     setTotalPages(getPagesCount(totalCount, limit));
   }
@@ -46,7 +57,25 @@ function Posts() {
     setPosts(posts.filter((item) => item.id !== id));
   };
   const SortedAndSearchPosts = usePosts(posts, filter.sort, filter.search);
+  useEffect(() => {
+    if (isLoading) return;
 
+    if (observerElem.current) {
+      let observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            console.log("loadMore");
+            setLoadMore(true);
+            setPage(page + 1);
+            observer.unobserve(observerElem.current);
+          }
+        },
+        { rootMargin: "0px" }
+      );
+
+      observer.observe(observerElem.current);
+    }
+  }, [isLoading]);
   return (
     <div className="App">
       <MyButton
@@ -62,10 +91,25 @@ function Posts() {
       </MyModal>
       <hr />
       <PostFilter setFilter={setFilter} filter={filter} />
+      <MySelect
+        value={limit}
+        onChange={(param) => {
+          setLimit(param);
+        }}
+        defaultValue={"set Limit"}
+        option={[
+          { name: "5", value: 5 },
+          { name: "10", value: 10 },
+          { name: "15", value: 15 },
+          { name: "Show all", value: -1 },
+        ]}
+      />
       {postError ? (
         <h2>Some error...</h2>
       ) : (
         <PostList
+          loadMore={loadMore}
+          observerElem={observerElem}
           posts={SortedAndSearchPosts}
           title={"Posts Javascript List"}
           removePost={removePost}
